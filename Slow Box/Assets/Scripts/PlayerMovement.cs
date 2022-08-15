@@ -4,16 +4,12 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    private float timeBtwPunch;
-    [SerializeField] private float startTimeBtwPunch;
-
-    [SerializeField] private Transform punchPos;
-    [SerializeField] private float punchRange;
-    [SerializeField] private LayerMask enemy;
-    [SerializeField] private float damage;
-    private Animator animator;
-
+    [SerializeField] private Punch lPunch;
+    [SerializeField] private Punch rPunch;
     private List<Collider> enemies = new List<Collider>();
+
+    private float timeBtwPunch;
+    private Animator animator;
 
     void Start()
     {
@@ -30,27 +26,20 @@ public class PlayerMovement : MonoBehaviour
     {
         if (timeBtwPunch <= 0f)
         {
-            if (Input.GetMouseButton(0))
+            if (Input.GetMouseButtonDown(0))
             {
                 animator.SetTrigger("punch");
-                enemies.AddRange(Physics.OverlapSphere(punchPos.position, punchRange, enemy));
-                foreach (Collider en in enemies)
-                {
-                    Debug.Log(damage);
-                }
+                timeBtwPunch = animator.GetCurrentAnimatorStateInfo(0).length;
             }
-
-            timeBtwPunch = startTimeBtwPunch;
         }
         else
         {
+            enemies = rPunch.GetEnemies();
+            foreach (Collider en in enemies)
+            {
+                en.gameObject.GetComponent<Enemy>().OffAnimator();
+            }
             timeBtwPunch -= Time.deltaTime;
         }
-    }
-
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.blue;
-        Gizmos.DrawWireSphere(punchPos.position, punchRange);
     }
 }
