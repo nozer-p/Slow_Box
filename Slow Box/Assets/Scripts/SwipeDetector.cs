@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,33 +10,19 @@ public class SwipeDetector : MonoBehaviour
     private Vector2 tapPos;
     private Vector2 tapPosNew;
 
-    private float side = 0f;
-    private float tapDelta = 0f;
-    [SerializeField] private float maxDeadZone = 1f;
-    [SerializeField] private float minTapDeltaPos = 1f;
-    private float percentages = 0f;
+    [SerializeField] private float minDeadZone = 1f;
+    private float delta = 0;
 
     private bool isSwiping;
     private bool isMobile;
 
     private void Start()
     {
-        side = 0f;
-        tapDelta = 0f;
-        if (maxDeadZone < 0)
-        {
-            maxDeadZone *= -1f;
-        }
-        else if (maxDeadZone == 0)
-        {
-            maxDeadZone = 1f;
-        }
-        percentages = 1f / maxDeadZone;
+        isSwiping = false;
         isMobile = Application.isMobilePlatform;
-        //isMobile = true;
     }
 
-    private void FixedUpdate()
+    private void Update()
     {
         if (!isMobile)
         {
@@ -48,9 +33,8 @@ public class SwipeDetector : MonoBehaviour
             }
             else if (Input.GetMouseButtonUp(0))
             {
-                ResetSwipe();
+                CheckSwipe();
             }
-            CheckSwipe();
         }
         else
         {
@@ -63,84 +47,48 @@ public class SwipeDetector : MonoBehaviour
                 }
                 else if (Input.GetTouch(0).phase == TouchPhase.Canceled || Input.GetTouch(0).phase == TouchPhase.Ended)
                 {
-                    ResetSwipe();
+                    CheckSwipe();
                 }
             }
-            CheckSwipe();
         }
-    }
-
-    public bool GetIsSwiping()
-    {
-        return isSwiping;
     }
 
     private void CheckSwipe()
     {
+        tapPosNew = Vector2.zero;
+
         if (isSwiping)
         {
-            if (!isMobile)
+            if (!isMobile && Input.GetMouseButtonUp(0))
             {
                 tapPosNew = (Vector2)Input.mousePosition;
-                CheckTapPosNew();
             }
-            else
+            else if (Input.touchCount > 0)
             {
                 tapPosNew = Input.GetTouch(0).position;
-                CheckTapPosNew();
             }
         }
 
         if (SwipeEvent != null)
         {
-            float deltaTmp;
-            if (tapDelta > maxDeadZone)
+            delta = tapPosNew.x - tapPos.x;
+            if (Mathf.Abs(delta) >= minDeadZone)
             {
-                deltaTmp = maxDeadZone;
+                SwipeEvent(delta);
             }
             else
             {
-                deltaTmp = tapDelta;
+                SwipeEvent(0f);
             }
-
-            float delta = deltaTmp * percentages * side;
-            SwipeEvent(delta);
-        }
-    }
-
-    private void CheckTapPosNew()
-    {
-        float dif = Mathf.Abs(tapPosNew.x - tapPos.x);
-        if (dif < tapDelta - minTapDeltaPos)
-        {
-            tapPos = tapPosNew;
-            tapDelta = Mathf.Abs(tapPosNew.x - tapPos.x);
-        }
-        else if (dif > tapDelta)
-        {
-            tapDelta = dif;
         }
 
-        side = 0;
-        if (tapPos.x > tapPosNew.x + minTapDeltaPos)
-        {
-            side = -1f;
-        }
-        else if (tapPos.x < tapPosNew.x - minTapDeltaPos)
-        {
-            side = 1f;
-
-        }
-        
-        //Debug.Log(dif);
-        //Debug.Log(tapDelta - minTapDeltaPos);
-        //Debug.Log(side);
+        ResetSwipe();
     }
 
     private void ResetSwipe()
     {
-        tapDelta = 0f;
         isSwiping = false;
+        delta = 0f;
         tapPos = Vector2.zero;
         tapPosNew = Vector2.zero;
     }
