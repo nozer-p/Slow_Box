@@ -90,7 +90,7 @@ public class PlayerMovement : MonoBehaviour
 
         foreach (Collider en in enemies)
         {
-            en.gameObject.GetComponent<EnemyMovement>().OffAnimator();
+            en.gameObject.GetComponent<EnemyMovement>().Die();
         }
     }
 
@@ -106,12 +106,13 @@ public class PlayerMovement : MonoBehaviour
     private void Die()
     {
         animator.enabled = false;
-        Time.timeScale = 0.5f;
         for (int i = 0; i < allRigidbodies.Length; i++)
         {
             allRigidbodies[i].isKinematic = false;
         }
+
         rPunch.gameObject.GetComponent<Collider>().enabled = false;
         lPunch.gameObject.GetComponent<Collider>().enabled = false;
+        gameObject.GetComponent<Collider>().enabled = false;
     }
 }

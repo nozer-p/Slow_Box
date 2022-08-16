@@ -8,6 +8,9 @@ public class EnemyMovement : MonoBehaviour
     [SerializeField] private Rigidbody[] allRigidbodies;
     private GameObject player;
 
+    [SerializeField] private Collider lPunch;
+    [SerializeField] private Collider rPunch;
+
     private bool side;
     private float timeBtwPunch;
     [SerializeField] private float startTimeBtwPunch;
@@ -26,7 +29,7 @@ public class EnemyMovement : MonoBehaviour
         }
     }
 
-    public void OffAnimator()
+    public void Die()
     {
         animator.enabled = false;
         Time.timeScale = 1f;
@@ -35,11 +38,20 @@ public class EnemyMovement : MonoBehaviour
             allRigidbodies[i].isKinematic = false;
         }
         gameObject.GetComponent<EnemyMovement>().enabled = false;
+
+        rPunch.enabled = false;
+        lPunch.enabled = false;
+        gameObject.GetComponent<Collider>().enabled = false;
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
-        if (Vector3.Distance(transform.position, player.transform.position) <= 1.2f)
+        if (!player.GetComponent<Animator>().enabled)
+        {
+            Time.timeScale = 1f;
+        }
+
+        if (Vector3.Distance(transform.position, player.transform.position) <= 1.1f)
         {
             animator.SetBool("walk", false);
             if (timeBtwPunch <= 0f)

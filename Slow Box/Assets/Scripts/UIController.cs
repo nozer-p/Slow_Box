@@ -6,6 +6,8 @@ public class UIController : MonoBehaviour
 {
     public void Restart()
     {
+        Time.timeScale = 1f;
         Application.LoadLevel(Application.loadedLevel);
+        Time.timeScale = 1f;
     }
 }
